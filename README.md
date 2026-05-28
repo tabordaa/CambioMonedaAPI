@@ -5,7 +5,7 @@ API desarrollada en **Java 17** y **Spring Boot** para gestionar monedas, tasas 
 ## Tecnologías Utilizadas
 
 - **Java 17**
-- **Spring Boot** (v3.x / v4.x según configuración local)
+- **Spring Boot 4.0.6**
 - **Spring Data JPA** (Hibernate) para el ORM y persistencia.
 - **PostgreSQL** como base de datos relacional.
 - **Maven** para la gestión de dependencias y construcción del proyecto.
@@ -16,19 +16,31 @@ El proyecto sigue una arquitectura organizada para separar claramente la lógica
 
 ```
 src/main/java/com/example/demo/
-├── DemoApplication.java                # Clase principal para iniciar la aplicación
+├── DemoApplication.java                    # Clase principal para iniciar la aplicación
+├── aplicacion/
+│   └── servicios/                          # Lógica de negocio
+│       ├── CambioMonedaServicio.java
+│       ├── MonedaServicio.java
+│       ├── PaisServicio.java
+│       └── UsuarioServicio.java
 ├── dominio/
-│   └── entidades/                      # Modelos de dominio (Entities mapeadas a la DB)
+│   └── entidades/                          # Modelos de dominio (Entities mapeadas a la DB)
 │       ├── CambioMoneda.java
 │       ├── Moneda.java
 │       ├── Pais.java
 │       └── Usuario.java
-└── infraestructura/
-    └── repositorios/                   # Interfaces JpaRepository para persistencia
-        ├── ICambioMonedaRepositorio.java
-        ├── IMonedaRepositorio.java
-        ├── IPaisRepositorio.java
-        └── IUsuarioRepositorio.java
+├── infraestructura/
+│   └── repositorios/                       # Interfaces JpaRepository para persistencia
+│       ├── ICambioMonedaRepositorio.java
+│       ├── IMonedaRepositorio.java
+│       ├── IPaisRepositorio.java
+│       └── IUsuarioRepositorio.java
+└── presentacion/
+    └── controladores/                      # REST Controllers (endpoints)
+        ├── CambioMonedaControlador.java
+        ├── MonedaControlador.java
+        ├── PaisControlador.java
+        └── UsuarioControlador.java
 ```
 
 ## Configuración de Base de Datos
@@ -36,10 +48,10 @@ src/main/java/com/example/demo/
 La API requiere una base de datos PostgreSQL. A continuación se encuentra el script DDL (Data Definition Language) inicial que se debe ejecutar en tu servidor PostgreSQL antes de iniciar la aplicación:
 
 ```sql
--- Ejecutar primero
-CREATE DATABASE Monedas; 
+-- Ejecutar primero (PostgreSQL almacena nombres en minúsculas si no se usan comillas)
+CREATE DATABASE monedas; 
 
--- Cambiar conexión a la base de datos "Monedas" antes de ejecutar lo siguiente:
+-- Cambiar conexión a la base de datos "monedas" antes de ejecutar lo siguiente:
 
 /* Crear tabla MONEDA */
 CREATE TABLE Moneda( 
@@ -92,19 +104,17 @@ CREATE TABLE Usuario(
 
 > **Nota:** Recuerda actualizar el archivo `src/main/resources/application.properties` con las credenciales correctas de tu base de datos:
 > ```properties
-> spring.datasource.url=jdbc:postgresql://localhost:5432/Monedas
+> spring.datasource.url=jdbc:postgresql://localhost:5432/monedas
 > spring.datasource.username=tu_usuario
 > spring.datasource.password=tu_contraseña
-> spring.jpa.hibernate.ddl-auto=validate
-> spring.jpa.show-sql=true
 > ```
 
 ## Cómo Ejecutar el Proyecto
 
-1. Asegúrate de tener **Java 17+** y **PostgreSQL** instalados en tu entorno.
+1. Asegúrate de tener **JDK 17+** (por ejemplo, [Eclipse Temurin](https://adoptium.net/)) y **PostgreSQL** instalados.
 2. Crea la base de datos y sus tablas usando el script SQL proporcionado.
-3. Clona o descarga este repositorio y abre una terminal en la ruta principal del proyecto.
-4. Ejecuta el comando de Maven para iniciar la aplicación:
+3. Actualiza las credenciales en `application.properties`.
+4. Abre una terminal en la carpeta `demo/` del proyecto y ejecuta:
    
    **En Windows:**
    ```bash
@@ -116,4 +126,90 @@ CREATE TABLE Usuario(
    ./mvnw spring-boot:run
    ```
 
-5. La API se iniciará por defecto en el puerto `8080`.
+5. La API se iniciará por defecto en `http://localhost:8080`.
+
+## Endpoints de la API
+
+Todos los endpoints retornan y reciben JSON (`Content-Type: application/json`).
+
+### Moneda — `/api/monedas`
+
+| Método   | URL                    | Descripción             | Body |
+|----------|------------------------|-------------------------|------|
+| `GET`    | `/api/monedas/`        | Listar todas            | No   |
+| `GET`    | `/api/monedas/{id}`    | Obtener por ID          | No   |
+| `POST`   | `/api/monedas/`        | Crear                   | JSON |
+| `PUT`    | `/api/monedas/`        | Modificar               | JSON |
+| `DELETE` | `/api/monedas/{id}`    | Eliminar                | No   |
+
+**Ejemplo POST/PUT body:**
+```json
+{
+    "moneda": "Dólar Estadounidense",
+    "sigla": "USD",
+    "simbolo": "$",
+    "emisor": "Reserva Federal"
+}
+```
+
+### Usuario — `/api/usuarios`
+
+| Método   | URL                     | Descripción             | Body |
+|----------|-------------------------|-------------------------|------|
+| `GET`    | `/api/usuarios/`        | Listar todos            | No   |
+| `GET`    | `/api/usuarios/{id}`    | Obtener por ID          | No   |
+| `POST`   | `/api/usuarios/`        | Crear                   | JSON |
+| `PUT`    | `/api/usuarios/`        | Modificar               | JSON |
+| `DELETE` | `/api/usuarios/{id}`    | Eliminar                | No   |
+
+**Ejemplo POST/PUT body:**
+```json
+{
+    "usuario": "jperez",
+    "nombre": "Juan Pérez",
+    "clave": "miPassword123",
+    "activo": true,
+    "roles": "ADMIN"
+}
+```
+
+### País — `/api/paises`
+
+| Método   | URL                   | Descripción             | Body |
+|----------|-----------------------|-------------------------|------|
+| `GET`    | `/api/paises/`        | Listar todos            | No   |
+| `GET`    | `/api/paises/{id}`    | Obtener por ID          | No   |
+| `POST`   | `/api/paises/`        | Crear                   | JSON |
+| `PUT`    | `/api/paises/`        | Modificar               | JSON |
+| `DELETE` | `/api/paises/{id}`    | Eliminar                | No   |
+
+**Ejemplo POST/PUT body** (requiere una Moneda existente):
+```json
+{
+    "pais": "Estados Unidos",
+    "codigoAlfa2": "US",
+    "codigoAlfa3": "USA",
+    "moneda": { "id": 1 }
+}
+```
+
+### Cambio Moneda — `/api/cambiomonedas`
+
+| Método   | URL                          | Descripción             | Body |
+|----------|------------------------------|-------------------------|------|
+| `GET`    | `/api/cambiomonedas/`        | Listar todos            | No   |
+| `GET`    | `/api/cambiomonedas/{id}`    | Obtener por ID          | No   |
+| `POST`   | `/api/cambiomonedas/`        | Crear                   | JSON |
+| `PUT`    | `/api/cambiomonedas/`        | Modificar               | JSON |
+| `DELETE` | `/api/cambiomonedas/{id}`    | Eliminar                | No   |
+
+**Ejemplo POST/PUT body** (requiere una Moneda existente):
+```json
+{
+    "moneda": { "id": 1 },
+    "fecha": "2026-05-28",
+    "cambio": 4250.50
+}
+```
+
+> **Nota:** La fecha se envía en formato ISO 8601 (`YYYY-MM-DD`). Existe una restricción `UNIQUE` sobre la combinación `(IdMoneda, Fecha)`.
