@@ -35,6 +35,12 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 
+		<!-- Agregado para soportar @RestController, @RequestMapping, etc -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
 		<!-- Agregado para soportar JPA, @Entity, JpaRepository, etc -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

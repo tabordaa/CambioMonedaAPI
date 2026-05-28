@@ -1,7 +1,7 @@
 package com.example.demo.dominio.entidades;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "CambioMoneda", uniqueConstraints = {
@@ -19,8 +19,7 @@ public class CambioMoneda {
     private Moneda moneda;
 
     @Column(name = "Fecha", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date fecha;
+    private LocalDate fecha;
 
     @Column(name = "Cambio", nullable = false)
     private float cambio;
@@ -28,7 +27,7 @@ public class CambioMoneda {
     public CambioMoneda() {
     }
 
-    public CambioMoneda(int id, Moneda moneda, Date fecha, float cambio) {
+    public CambioMoneda(int id, Moneda moneda, LocalDate fecha, float cambio) {
         this.id = id;
         this.moneda = moneda;
         this.fecha = fecha;
@@ -51,11 +50,11 @@ public class CambioMoneda {
         this.moneda = moneda;
     }
 
-    public Date getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 
